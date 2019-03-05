@@ -1,0 +1,10 @@
+{
+  "short_name": "poc",
+  "name": "Offline webapp poc",
+  "icons": [{
+    "src": "/assets/images/icon-512.png",
+    "type": "image/png",
+    "sizes": "512x512"
+  }],
+  "display": "standalone"
+}
