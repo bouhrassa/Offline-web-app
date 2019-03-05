@@ -6,18 +6,14 @@ function generatePostKey() {
 
 window.addEventListener("DOMContentLoaded", () => {
   if ("serviceWorker" in navigator) {
-
     // Service worker registration
     navigator.serviceWorker
       .register("/sw.js")
       .then(registration => {
         console.log("Service Worker registration was successful with scope: ", registration.scope);
-        return registration;
+        return navigator.serviceWorker.ready
       })
-      .catch(error => console.log("Registration failed with error: ", error));
-
-    // Sync Post event registration
-    navigator.serviceWorker.ready
+      // Sync Post event registration
       .then(registration => {
         console.log("Service Worker ready");
         let form = document.getElementById("postForm");
@@ -42,6 +38,7 @@ window.addEventListener("DOMContentLoaded", () => {
           })
         }
       })
+      .catch(error => console.log("Registration failed with error: ", error));
   }
 });
 

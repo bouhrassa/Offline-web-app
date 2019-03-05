@@ -5,7 +5,6 @@ const CACHE_VERSION = "offline_cache_v2";
 
 //All the files we want to cache
 const cacheAssets = [
-  "/sw.js",
   "/index.html",
   "/postData.html",
   "/favicon.ico",
@@ -77,23 +76,9 @@ self.addEventListener("fetch", event => {
       // out whether our request is in any of them
       caches.match(event.request.clone())
       .then(response => {
-        if (response) {
-          return response;
-        }
-        // No match in cache, use the network instead
-        console.log("Fetching request online");
-        return fetch(event.request);
+        return response || fetch(event.request);
       })
     );
-  } else if (event.request.clone().method === 'POST') {
-    // Attempt to send request normally
-    console.log("Should not be here");
-    event.respondWith(
-      fetch(event.request)
-      .catch(error => {
-        console.log("Failed to post normaly: ", error);
-        throw error
-      }))
   }
 });
 
