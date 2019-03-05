@@ -15,12 +15,8 @@ const cacheAssets = [
   "/assets/js/bootstrap.min.js",
   "/assets/js/jquery-3.3.1.min.js",
   "/assets/js/localforage.min.js",
-  "/assets/js/offline.min.js",
-  "/assets/js/offlinejsoptions.js",
 
   "/assets/css/bootstrap.min.css",
-  "/assets/css/offline-language-english.min.css",
-  "/assets/css/offline-theme-default-indicator.css",
 ];
 
 
