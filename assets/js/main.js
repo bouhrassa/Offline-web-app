@@ -14,8 +14,12 @@ window.addEventListener("DOMContentLoaded", () => {
         console.log("Service Worker registration was successful with scope: ", registration.scope);
         return registration;
       })
-      // Sync Post event registration
+      .catch(error => console.log("Registration failed with error: ", error));
+
+    // Sync Post event registration
+    navigator.serviceWorker.ready
       .then(registration => {
+        console.log("Service Worker ready");
         let form = document.getElementById("postForm");
         if (form) {
           document.addEventListener("submit", event => {
@@ -38,7 +42,6 @@ window.addEventListener("DOMContentLoaded", () => {
           })
         }
       })
-      .catch(error => console.log("Registration failed with error: ", error));
   }
 });
 

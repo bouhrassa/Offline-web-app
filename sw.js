@@ -1,10 +1,11 @@
 importScripts("/assets/js/localforage.min.js"); // IndexedDB library
 
 //Change value to update the cache and clear older files.
-const CACHE_VERSION = "offline_cache_v1";
+const CACHE_VERSION = "offline_cache_v2";
 
 //All the files we want to cache
 const cacheAssets = [
+  "/sw.js",
   "/index.html",
   "/postData.html",
   "/favicon.ico",
@@ -86,7 +87,7 @@ self.addEventListener("fetch", event => {
     );
   } else if (event.request.clone().method === 'POST') {
     // Attempt to send request normally
-    console.log("SHould not be here");
+    console.log("Should not be here");
     event.respondWith(
       fetch(event.request)
       .catch(error => {
@@ -105,7 +106,7 @@ self.addEventListener('sync', event => {
       // Send our POST request to the server, now that the user is online
       localforage.iterate((data, key, iterationNumber) => {
         console.log("Sync post:", key, data, "iteration: ", iterationNumber);
-        return sendPostToServer(key, data);
+        sendPostToServer(key, data);
       })
     );
   }
