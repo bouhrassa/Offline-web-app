@@ -1,21 +1,18 @@
 importScripts("/assets/js/localforage.min.js"); // IndexedDB library
 
 //Change value to update the cache and clear older files.
-const CACHE_VERSION = "offline_cache_v2";
+const CACHE_VERSION = "offline_cache_v1";
 
 //All the files we want to cache
 const cacheAssets = [
+  "/",
   "/index.html",
   "/postData.html",
-  "/favicon.ico",
-
   "/assets/images/icon-512.png",
-
   "/assets/js/main.js",
   "/assets/js/bootstrap.min.js",
   "/assets/js/jquery-3.3.1.min.js",
   "/assets/js/localforage.min.js",
-
   "/assets/css/bootstrap.min.css",
 ];
 
@@ -28,11 +25,11 @@ self.addEventListener("install", event => {
     .open(CACHE_VERSION)
     .then(cache => {
       console.log("ServiceWorker : Caching files");
-      // cache.addAll(cacheAssets);
-      cacheAssets.forEach(asset => {
-        cache.add(asset)
-          .catch(() => console.log("Failed to cache: ", asset));
-      });
+      cache.addAll(cacheAssets);
+      // cacheAssets.forEach(asset => {
+      //   cache.add(asset)
+      //     .catch(() => console.log("Failed to cache: ", asset));
+      // });
     })
     .then(() => {
       console.log("Files cached");
@@ -66,12 +63,16 @@ self.addEventListener("activate", event => {
 
 // Fetch event
 self.addEventListener("fetch", event => {
-  if (event.request.clone().method === 'GET') {
+  if (event.request.method === 'GET') {
     event.respondWith(
       // Check all the caches in the browser and find
       // out whether our request is in any of them
-      caches.match(event.request.clone())
+      caches.match(event.request)
       .then(response => {
+        if (response)
+          console.log("response from cache", response.url);
+        else
+          console.log("response from fetch", event.request.clone().url);
         return response || fetch(event.request);
       })
     );
@@ -82,19 +83,29 @@ self.addEventListener("fetch", event => {
 self.addEventListener('sync', event => {
   console.log('Now online, sync event fired');
   // event.tag name must be the same as the one used while registering sync
-  if (event.tag === 'postData') {
+  if (event.tag === "postData") {
     event.waitUntil(
       // Send our POST request to the server, now that the user is online
-      localforage.iterate((data, key, iterationNumber) => {
-        console.log("Sync post:", key, data, "iteration: ", iterationNumber);
-        sendPostToServer(key, data);
+      localforage.length()
+      .then(numberOfKey => {
+        if (numberOfKey) {
+          localforage.iterate((data, key, iterationNumber) => {
+              console.log("Sync post:", key, data, "iteration: ", iterationNumber);
+              sendPostToServer(key, data);
+            })
+            .then(() => notifyClient("true"))
+            .catch(() => {
+              notifyClient("false");
+              throw error;
+            })
+        }
       })
-    );
+    )
   }
 });
 
-async function sendPostToServer(key, request) {
-  return fetch(request.url, {
+function sendPostToServer(key, request) {
+  fetch(request.url, {
       method: request.method,
       headers: request.header,
       body: JSON.stringify(request.payload),
@@ -114,4 +125,12 @@ async function sendPostToServer(key, request) {
       // so the background sync knows to keep retrying sending to server.
       throw error;
     });
+}
+
+// Notify the client 
+function notifyClient(confirmation) {
+  const channel = new BroadcastChannel('sw-confirmation');
+  channel.postMessage({
+    confirmation: confirmation
+  });
 }
